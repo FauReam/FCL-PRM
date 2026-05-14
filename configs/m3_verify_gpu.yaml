@@ -1,10 +1,10 @@
-# M3: Naive FedAvg-PRM — 4-Client Simulation
-# Establish the failure mode of naive parameter aggregation.
+# M3: Ultra-fast GPU verification for single RTX 4070 12GB
+# Goal: confirm naive FedAvg failure mode in < 30 min
 
 experiment:
-  name: "m3_naive_fedavg_4clients"
+  name: "m3_verify_gpu"
   milestone: "M3"
-  description: "Naive FedAvg for PRM across 4 heterogeneous clients"
+  description: "Fast GPU verification: 4 clients x 50 samples, 3 rounds, CUDA"
   seed: 42
 
 model:
@@ -16,14 +16,14 @@ data:
   dataset: "versaprm"
   data_dir: "./data/versaprm"
   domains: ["math", "code", "medical", "general"]
-  samples_per_client: 5000
+  samples_per_client: 50
   max_length: 256
 
 federated:
   num_clients: 4
-  num_rounds: 50
+  num_rounds: 3
   local_epochs: 2
-  local_batch_size: 32
+  local_batch_size: 16
   local_learning_rate: 1.0e-4
   aggregation: "fedavg"
   participation_rate: 1.0
@@ -34,13 +34,13 @@ training:
   max_grad_norm: 1.0
 
 evaluation:
-  eval_every: 5
+  eval_every: 1
   eval_split: "val"
 
 logging:
-  log_dir: "./experiments/M3_naive_fedavg_prm/results/logs"
-  checkpoint_dir: "./experiments/M3_naive_fedavg_prm/results/checkpoints"
-  save_every: 10
+  log_dir: "./experiments/M3_naive_fedavg_prm/results/logs_verify"
+  checkpoint_dir: "./experiments/M3_naive_fedavg_prm/results/checkpoints_verify"
+  save_every: 1
 
 hardware:
   device: "cuda"

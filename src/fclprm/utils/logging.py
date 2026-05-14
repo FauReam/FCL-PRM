@@ -1,7 +1,7 @@
 """Structured JSONL logging for experiment tracking."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -37,7 +37,7 @@ class ExperimentLogger:
             metrics: Metric values dict.
         """
         record = {
-            "timestamp": datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "experiment_id": self.experiment_id,
             "milestone": milestone,
             "config_hash": config_hash,

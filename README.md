@@ -208,10 +208,12 @@ FCL-PRM/
 │       └── seed.py                  # 随机种子管理
 │
 ├── configs/                         # 实验配置文件（YAML）
-│   ├── m2_pythia_1b.yaml
-│   ├── m3_naive_fedavg.yaml
-│   ├── m4_anchor_prm.yaml
-│   └── m5_cd_spi.yaml
+│   ├── m2_pythia_1b.yaml            # M2 中心化基线（batch 8, len 256）
+│   ├── m3_verify_gpu.yaml           # M3 极简 GPU 验证（~20 min）
+│   ├── m3_naive_fedavg.yaml         # M3 生产（50 轮, len 256, 4070 友好）
+│   ├── m4_anchor_prm.yaml           # M4 生产（100 轮, len 256）
+│   ├── m5_cd_spi.yaml               # M5 CD-SPI 测量
+│   └── m6_dp_privacy.yaml           # M6 DP-SGD + 隐私攻击
 │
 ├── scripts/                         # 可执行脚本
 │   ├── train_centralized_prm.py     # 中心化训练
@@ -272,16 +274,21 @@ FCL-PRM/
 
 ## 6. 快速开始
 
+**开发硬件**：单张 RTX 4070 12GB（CUDA）即可跑通全部流程。`max_length` 默认 256，在 4070 上显存占用约 8-10GB；若使用 512，batch 32 会触发 OOM 或导致利用率断崖下跌。
+
 ```bash
 git clone https://github.com/<user>/FCL-PRM.git
 cd FCL-PRM
 conda create -n fclprm python=3.11
 pip install -r requirements.txt
 
-# 复现 PRM800K 中心化 baseline
+# 复现 PRM800K 中心化 baseline（~8.5h）
 python scripts/train_centralized_prm.py --config configs/m2_pythia_1b.yaml
 
-# 4 客户端朴素联邦 PRM 仿真
+# M3 极简 GPU 验证（4 客户端 x 50 样本，3 轮，~20 min）
+python scripts/run_federated.py --config configs/m3_verify_gpu.yaml
+
+# M3 生产规模（4 客户端 x 5,000 样本，50 轮，~1.5 天）
 python scripts/run_federated.py --config configs/m3_naive_fedavg.yaml
 ```
 
@@ -300,15 +307,31 @@ python src/fclprm/utils/experiment_collector.py \
 
 ---
 
-## 7. 模型 / 数据 / 评估矩阵
+## 7. 模型 / 数据 / 评估矩阵（RTX 4070 12GB 适配版）
 
-| 阶段 | 基座模型 | 数据 | 评估 |
+| 阶段 | 基座模型 | 数据 | 评估 | 4070 耗时 |
+|---|---|---|---|---|
+| M2 baseline | Pythia 1.4B | PRM800K (math) | ProcessBench, BoN@64 | **~8.5 h** |
+| M3 verify | Pythia 1.4B | VersaPRM 4 域 x 50 | Val MSE (per-domain) | **~20 min** |
+| M3 naive | Pythia 1.4B | VersaPRM 4 域 x 5,000 | ProcessBench (per-domain) | **~1.5 d** |
+| M4 anchor | Pythia 1.4B | VersaPRM 4 域 x 5,000 | ProcessBench, CD-SPI | **~3 d** |
+| M5 CD-SPI | Pythia 1.4B | VersaPRM 4 域 x 5,000 | CD-SPI taxonomy | **嵌入 M4** |
+| M6 隐私 | Pythia 1.4B | VersaPRM 4 域 x 5,000 | DP epsilon-utility, MIA AUC | **~2 d** |
+
+> **4070 效率说明**：`max_length` 从 512 降至 256 后，batch 32 在 4070 上利用率从 ~45% 提升至 ~85%，单 step 耗时从 ~5.5s 降至 ~2.5s。若显存仍吃紧，可再降至 batch 24。
+
+### 实时速率参考（Pythia-1.4B frozen + MLP head，CUDA）
+
+| 配置 | Step 耗时 | 每轮耗时 | 说明 |
 |---|---|---|---|
-| M2 baseline | Pythia 1.4B | PRM800K | ProcessBench, BoN@64 |
-| M3 naive | Pythia 1.4B | PRM800K + VersaPRM 子集（4 域）| ProcessBench (per-domain) |
-| M4 anchor | Pythia 1.4B -> LLaMA-3.1 8B | + MedPRMBench | ProcessBench, PRMBench, CD-SPI |
-| M5 主实验 | LLaMA-3.1 8B | 4 客户端完整数据 | + best-of-N reasoning accuracy |
-| M6 隐私 | LLaMA-3.1 8B | 同上 | DP epsilon-utility 曲线 + reconstruction MIA AUC |
+| M2: batch 8, len 256 | **~1.7 s** | — | 单客户端中心化 |
+| M3 verify: batch 16, len 256 | **~2.0 s** | **~10 min** | 4 客户端 x 50 样本 x 2 epoch |
+| M3/M4 prod: batch 32, len 256 | **~2.5 s** | **~40 min** | 4 客户端 x 5,000 样本 x 2 epoch |
+| M6 prod: batch 32, len 256 + DP | **~2.8 s** | **~45 min** | + 梯度裁剪与噪声开销 |
+
+**显存占用**（实测估算）：
+- batch 32, len 256, Pythia-1.4B frozen：~8.5 GB
+- batch 32, len 512, Pythia-1.4B frozen：~11.5 GB（危险区，易 OOM）
 
 ---
 

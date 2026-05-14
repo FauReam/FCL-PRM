@@ -16,7 +16,7 @@ data:
   dataset: "versaprm"
   data_dir: "./data/versaprm"
   domains: ["math", "code", "medical", "general"]
-  max_length: 512
+  max_length: 256
 
 federated:
   num_clients: 4
