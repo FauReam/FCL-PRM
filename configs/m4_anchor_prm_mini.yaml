@@ -1,0 +1,54 @@
+# M4: Anchor-PRM — Mini run for pipeline verification
+# 4 clients, 5 samples/client, 2 rounds, anchor alignment
+
+experiment:
+  name: "m4_anchor_prm_mini"
+  milestone: "M4"
+  description: "Anchor-PRM mini run (4 clients, 5 samples each, 2 rounds)"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  samples_per_client: 5
+  max_length: 128
+
+federated:
+  num_clients: 4
+  num_rounds: 2
+  local_epochs: 1
+  local_batch_size: 16
+  local_learning_rate: 1.0e-4
+  aggregation: "anchor_prm"
+  participation_rate: 1.0
+
+anchor:
+  steps:
+    - "Let x be the variable we want to solve for."
+    - "First, identify the key constraints of the problem."
+    - "Therefore, the answer must be positive."
+    - "We can verify this by substitution."
+
+training:
+  optimizer: "adamw"
+  scheduler: "constant"
+  max_grad_norm: 1.0
+
+evaluation:
+  eval_every: 1
+  eval_split: "val"
+
+logging:
+  log_dir: "./experiments/M4_anchor_prm/results/logs_mini"
+  checkpoint_dir: "./experiments/M4_anchor_prm/results/checkpoints_mini"
+  save_every: 10
+
+hardware:
+  device: "cpu"
+  num_workers: 0

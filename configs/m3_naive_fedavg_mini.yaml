@@ -1,0 +1,47 @@
+# M3: Naive FedAvg-PRM — Mini run for pipeline verification
+# 4 clients, 5 samples/client, 2 rounds
+
+experiment:
+  name: "m3_naive_fedavg_mini"
+  milestone: "M3"
+  description: "Naive FedAvg-PRM mini run (4 clients, 5 samples each, 2 rounds)"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  samples_per_client: 5
+  max_length: 128
+
+federated:
+  num_clients: 4
+  num_rounds: 2
+  local_epochs: 1
+  local_batch_size: 16
+  local_learning_rate: 1.0e-4
+  aggregation: "fedavg"
+  participation_rate: 1.0
+
+training:
+  optimizer: "adamw"
+  scheduler: "constant"
+  max_grad_norm: 1.0
+
+evaluation:
+  eval_every: 1
+  eval_split: "val"
+
+logging:
+  log_dir: "./experiments/M3_naive_fedavg_prm/results/logs_mini"
+  checkpoint_dir: "./experiments/M3_naive_fedavg_prm/results/checkpoints_mini"
+  save_every: 10
+
+hardware:
+  device: "cpu"
+  num_workers: 0

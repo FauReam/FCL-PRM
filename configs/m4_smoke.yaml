@@ -1,0 +1,57 @@
+# M4 smoke: same scale as m3_smoke but anchor_prm aggregation, exercising
+# Hungarian rebasin on real Pythia head embeddings.
+
+experiment:
+  name: "m4_smoke"
+  milestone: "M4-smoke"
+  description: "End-to-end smoke: 2 clients, 1 round, anchor_prm, CPU"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 64
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code"]
+  samples_per_client: 8
+  max_length: 64
+
+federated:
+  num_clients: 2
+  num_rounds: 1
+  local_epochs: 1
+  local_batch_size: 4
+  local_learning_rate: 1.0e-4
+  aggregation: "anchor_prm"
+  participation_rate: 1.0
+
+anchor:
+  num_anchor_steps: 4
+  alignment_weight: 0.1
+  steps:
+    - "Let x be the variable we want to solve for."
+    - "First, identify the key constraints of the problem."
+    - "Therefore, the answer must be positive."
+    - "We can verify this by substitution."
+
+training:
+  optimizer: "adamw"
+  scheduler: "constant"
+  max_grad_norm: 1.0
+
+evaluation:
+  eval_every: 1
+  eval_split: "val"
+  compute_cd_spi: false
+
+logging:
+  log_dir: "./experiments/M4_anchor_prm/results/logs_smoke"
+  checkpoint_dir: "./experiments/M4_anchor_prm/results/ckpt_smoke"
+  save_every: 1
+
+hardware:
+  device: "cpu"
+  num_workers: 0

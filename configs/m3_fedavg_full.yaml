@@ -1,0 +1,47 @@
+# M3: Naive FedAvg-PRM — Full-scale federated simulation
+# 4 clients, 500 samples each, 10 rounds, Pythia 1.4B
+
+experiment:
+  name: "m3_fedavg_full"
+  milestone: "M3"
+  description: "Naive FedAvg: 4 clients x 500 samples, 10 rounds, MPS"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  samples_per_client: 500
+  max_length: 128
+
+federated:
+  num_clients: 4
+  num_rounds: 10
+  local_epochs: 2
+  local_batch_size: 16
+  local_learning_rate: 1.0e-4
+  aggregation: "fedavg"
+  participation_rate: 1.0
+
+training:
+  optimizer: "adamw"
+  scheduler: "constant"
+  max_grad_norm: 1.0
+
+evaluation:
+  eval_every: 1
+  eval_split: "val"
+
+logging:
+  log_dir: "./experiments/M3_naive_fedavg_prm/results/logs_full"
+  checkpoint_dir: "./experiments/M3_naive_fedavg_prm/results/checkpoints_full"
+  save_every: 5
+
+hardware:
+  device: "mps"
+  num_workers: 0

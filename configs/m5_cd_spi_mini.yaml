@@ -1,0 +1,50 @@
+# M5: CD-SPI — Mini run for pipeline verification
+# Compute cross-domain step polysemy index on 4 anchor steps
+
+experiment:
+  name: "m5_cd_spi_mini"
+  milestone: "M5"
+  description: "CD-SPI mini run (4 clients, 4 anchor steps)"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  max_length: 128
+
+federated:
+  num_clients: 4
+  num_rounds: 2
+  local_epochs: 1
+  local_batch_size: 16
+  local_learning_rate: 1.0e-4
+  aggregation: "anchor_prm"
+  participation_rate: 1.0
+
+cd_spi:
+  step_categories:
+    - "logical_connector"
+    - "variable_definition"
+    - "calculation"
+    - "conclusion"
+  num_samples_per_category: 5
+  measurement_rounds: [1, 2]
+
+evaluation:
+  compute_cd_spi: true
+  save_embeddings: true
+
+logging:
+  log_dir: "./experiments/M5_cd_spi/results/logs_mini"
+  embedding_dir: "./experiments/M5_cd_spi/results/embeddings_mini"
+  save_every: 1
+
+hardware:
+  device: "cpu"
+  num_workers: 0

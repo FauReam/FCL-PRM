@@ -1,0 +1,47 @@
+# M3 smoke: minimal end-to-end fedavg pipeline check on real Pythia + VersaPRM.
+# Goal: confirm the run_federated.py pipeline actually runs through, NOT to learn anything.
+
+experiment:
+  name: "m3_smoke"
+  milestone: "M3-smoke"
+  description: "End-to-end smoke: 2 clients, 1 round, ~32 samples each, CPU"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 64
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code"]
+  samples_per_client: 8       # ~32 step samples once expanded by step
+  max_length: 64
+
+federated:
+  num_clients: 2
+  num_rounds: 1
+  local_epochs: 1
+  local_batch_size: 4
+  local_learning_rate: 1.0e-4
+  aggregation: "fedavg"
+  participation_rate: 1.0
+
+training:
+  optimizer: "adamw"
+  scheduler: "constant"
+  max_grad_norm: 1.0
+
+evaluation:
+  eval_every: 1
+  eval_split: "val"
+
+logging:
+  log_dir: "./experiments/M3_naive_fedavg_prm/results/logs_smoke"
+  checkpoint_dir: "./experiments/M3_naive_fedavg_prm/results/ckpt_smoke"
+  save_every: 1
+
+hardware:
+  device: "cpu"
+  num_workers: 0

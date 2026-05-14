@@ -1,0 +1,43 @@
+# M2: Centralized PRM Baseline — Mini run for pipeline verification
+# 10 samples/domain, 1 epoch, batch 16
+
+experiment:
+  name: "m2_centralized_mini"
+  milestone: "M2"
+  description: "Centralized PRM mini run (40 CoT samples, ~400 steps)"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  samples_per_domain: 10
+  max_length: 128
+  val_split: 0.1
+
+training:
+  batch_size: 16
+  num_epochs: 1
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  optimizer: "adamw"
+  scheduler: "constant"
+
+evaluation:
+  eval_every: 10
+  eval_batch_size: 32
+
+logging:
+  log_dir: "./experiments/M2_centralized_prm/results/logs_mini"
+  checkpoint_dir: "./experiments/M2_centralized_prm/results/checkpoints_mini"
+  save_every: 500
+
+hardware:
+  device: "cpu"
+  num_workers: 0

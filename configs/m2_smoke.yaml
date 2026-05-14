@@ -1,0 +1,44 @@
+# M2: Extreme smoke test — same code path, tiny everything
+# Uses official train_centralized_prm.py with minimal config.
+
+experiment:
+  name: "m2_smoke"
+  milestone: "M2-smoke"
+  description: "M2 smoke: tiny-gpt2, 2 samples, 1 epoch, CPU"
+  seed: 42
+
+model:
+  backbone: "sshleifer/tiny-gpt2"
+  prm_head_dim: 8
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math"]
+  samples_per_domain: 2
+  max_length: 32
+  val_split: 0.5
+
+training:
+  batch_size: 2
+  num_epochs: 1
+  learning_rate: 1.0e-3
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  optimizer: "adamw"
+  scheduler: "constant"
+
+evaluation:
+  eval_every: 1
+  eval_batch_size: 2
+
+logging:
+  log_dir: "./experiments/M2_centralized_prm/results/logs_smoke"
+  checkpoint_dir: "./experiments/M2_centralized_prm/results/checkpoints_smoke"
+  save_every: 1
+  use_wandb: false
+
+hardware:
+  device: "cpu"
+  num_workers: 0

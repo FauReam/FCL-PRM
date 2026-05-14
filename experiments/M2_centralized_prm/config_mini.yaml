@@ -1,0 +1,37 @@
+# M2: Centralized PRM Baseline — Mini Run (CPU, tiny data)
+experiment:
+  name: "m2_centralized_mini"
+  milestone: "M2"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "prm800k"
+  data_dir: "./data/prm800k"
+  split: "mini_train"
+  val_split: 0.1
+  max_length: 256
+
+training:
+  batch_size: 8
+  num_epochs: 1
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+
+evaluation:
+  eval_every: 1000
+  eval_batch_size: 16
+
+logging:
+  log_dir: "./experiments/M2_centralized_prm/results/logs_mini"
+  checkpoint_dir: "./experiments/M2_centralized_prm/results/checkpoints_mini"
+  use_wandb: false
+
+hardware:
+  device: "cpu"
+  num_workers: 0

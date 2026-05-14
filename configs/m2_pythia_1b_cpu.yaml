@@ -1,0 +1,46 @@
+# M2: Centralized PRM Baseline — Pythia 1.4B (CPU fallback)
+# Full-scale training on VersaPRM (PRM800K not available locally).
+
+experiment:
+  name: "m2_centralized_prm_pythia_1b_cpu"
+  milestone: "M2"
+  description: "Centralized PRM training on VersaPRM with Pythia 1.4B (CPU)"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  samples_per_domain: 5000
+  max_length: 512
+  val_split: 0.1
+
+training:
+  batch_size: 8
+  num_epochs: 3
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  warmup_steps: 500
+  max_grad_norm: 1.0
+  optimizer: "adamw"
+  scheduler: "cosine"
+
+evaluation:
+  eval_every: 500
+  eval_batch_size: 16
+  metrics: ["accuracy", "f1", "auc"]
+
+logging:
+  log_dir: "./experiments/M2_centralized_prm/results/logs"
+  checkpoint_dir: "./experiments/M2_centralized_prm/results/checkpoints"
+  save_every: 1000
+  use_wandb: false
+
+hardware:
+  device: "cpu"
+  num_workers: 0

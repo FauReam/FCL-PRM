@@ -1,0 +1,62 @@
+# M4: Anchor-PRM — Full-scale with Hungarian rebasin
+# 4 clients, 500 samples each, 10 rounds, 100 anchor steps
+
+experiment:
+  name: "m4_anchor_full"
+  milestone: "M4"
+  description: "Anchor-PRM: 4 clients x 500 samples, 10 rounds, MPS"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  samples_per_client: 500
+  max_length: 128
+
+federated:
+  num_clients: 4
+  num_rounds: 10
+  local_epochs: 2
+  local_batch_size: 16
+  local_learning_rate: 1.0e-4
+  aggregation: "anchor_prm"
+  participation_rate: 1.0
+
+anchor:
+  num_anchor_steps: 100
+  alignment_weight: 0.1
+  steps:
+    - "Let x be the variable we want to solve for."
+    - "First, identify the key constraints of the problem."
+    - "Therefore, the answer must be positive."
+    - "We can verify this by substitution."
+    - "Combining the two equations gives us a single unknown."
+    - "By the definition above, this implies the next inequality."
+    - "Hence, the conclusion follows from the previous step."
+    - "Note that this assumption holds only when the input is non-empty."
+    - "Substituting the value back into the original equation."
+    - "This completes the proof by contradiction."
+
+training:
+  optimizer: "adamw"
+  scheduler: "constant"
+  max_grad_norm: 1.0
+
+evaluation:
+  eval_every: 1
+  eval_split: "val"
+
+logging:
+  log_dir: "./experiments/M4_anchor_prm/results/logs_full"
+  checkpoint_dir: "./experiments/M4_anchor_prm/results/checkpoints_full"
+  save_every: 5
+
+hardware:
+  device: "mps"
+  num_workers: 0

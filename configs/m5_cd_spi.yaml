@@ -1,0 +1,51 @@
+# M5: Cross-Domain Step Polysemy Index (CD-SPI)
+# Measure whether step embeddings share universal substrate across domains.
+
+experiment:
+  name: "m5_cd_spi_measurement"
+  milestone: "M5"
+  description: "CD-SPI: measure cross-domain step polysemy"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  max_length: 512
+
+federated:
+  num_clients: 4
+  num_rounds: 100
+  local_epochs: 2
+  local_batch_size: 32
+  local_learning_rate: 1.0e-4
+  aggregation: "anchor_prm"
+  participation_rate: 1.0
+
+cd_spi:
+  step_categories:
+    - "logical_connector"
+    - "variable_definition"
+    - "calculation"
+    - "domain_reference"
+    - "conclusion"
+  num_samples_per_category: 50
+  measurement_rounds: [1, 10, 25, 50, 100]
+
+evaluation:
+  compute_cd_spi: true
+  save_embeddings: true
+
+logging:
+  log_dir: "./experiments/M5_cd_spi/results/logs"
+  embedding_dir: "./experiments/M5_cd_spi/results/embeddings"
+  save_every: 1
+
+hardware:
+  device: "cuda"
+  num_workers: 0

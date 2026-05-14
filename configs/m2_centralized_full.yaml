@@ -1,0 +1,44 @@
+# M2: Centralized PRM Baseline — Pythia 1.4B on VersaPRM
+# Upper-bound baseline: train on pooled data from all 4 domains.
+
+experiment:
+  name: "m2_centralized_versaprm"
+  milestone: "M2"
+  description: "Centralized PRM training on VersaPRM 4 domains (500 samples each)"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  samples_per_domain: 500
+  max_length: 128
+  val_split: 0.1
+
+training:
+  batch_size: 16
+  num_epochs: 3
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  optimizer: "adamw"
+  scheduler: "constant"
+
+evaluation:
+  eval_every: 100
+  eval_batch_size: 32
+
+logging:
+  log_dir: "./experiments/M2_centralized_prm/results/logs_full"
+  checkpoint_dir: "./experiments/M2_centralized_prm/results/checkpoints_full"
+  save_every: 500
+  use_wandb: false
+
+hardware:
+  device: "mps"
+  num_workers: 0

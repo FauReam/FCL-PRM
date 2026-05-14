@@ -1,0 +1,47 @@
+# M3: Naive FedAvg-PRM — 4-Client Simulation
+# Establish the failure mode of naive parameter aggregation.
+
+experiment:
+  name: "m3_naive_fedavg_4clients"
+  milestone: "M3"
+  description: "Naive FedAvg for PRM across 4 heterogeneous clients"
+  seed: 42
+
+model:
+  backbone: "EleutherAI/pythia-1.4b"
+  prm_head_dim: 256
+  freeze_backbone: true
+
+data:
+  dataset: "versaprm"
+  data_dir: "./data/versaprm"
+  domains: ["math", "code", "medical", "general"]
+  samples_per_client: 5000
+  max_length: 512
+
+federated:
+  num_clients: 4
+  num_rounds: 50
+  local_epochs: 2
+  local_batch_size: 32
+  local_learning_rate: 1.0e-4
+  aggregation: "fedavg"
+  participation_rate: 1.0
+
+training:
+  optimizer: "adamw"
+  scheduler: "constant"
+  max_grad_norm: 1.0
+
+evaluation:
+  eval_every: 5
+  eval_split: "val"
+
+logging:
+  log_dir: "./experiments/M3_naive_fedavg_prm/results/logs"
+  checkpoint_dir: "./experiments/M3_naive_fedavg_prm/results/checkpoints"
+  save_every: 10
+
+hardware:
+  device: "cuda"
+  num_workers: 0
